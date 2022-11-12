@@ -2,6 +2,8 @@ package com.cydeo.repository;
 
 import com.cydeo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +26,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByUsernameContainsAndUsernameIgnoreCase(String pattern);
 
     //Write a derived query to list all users with an age greater than a specified age?
-
+    List<User> findAllByAccountAgeGreaterThan(Integer age);
 
     // ------------------- JPQL QUERIES ------------------- //
 
     //Write a JPQL query that returns a user read by email?
+    @Query("SELECT u FROM User u WHERE u.email = ?1")
+    Optional<User> retrieveByEmail(@Param("email")String email);
 
     //Write a JPQL query that returns a user read by username?
+    @Query("SELECT u FROM User u WHERE u.username = ?1")
+    Optional<User> retrieveByUserName(@Param("userName")String userName);
 
     //Write a JPQL query that returns all users?
+    @Query("SELECT u FROM User u")
+    List<User> returnAllUsers();
 
     // ------------------- Native QUERIES ------------------- //
 
