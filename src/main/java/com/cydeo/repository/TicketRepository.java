@@ -2,6 +2,7 @@ package com.cydeo.repository;
 
 import com.cydeo.entity.Movie;
 import com.cydeo.entity.Ticket;
+import com.cydeo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,17 +40,27 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     // ------------------- Native QUERIES ------------------- //
 
     //Write a native query to count the number of tickets a user bought
-    @Query(value = "SELECT * ",nativeQuery = true)
-    Integer countAllByUserAccountId();
+    @Query(value = "SELECT Count(*) FROM ticket WHERE user = ?1 ",nativeQuery = true)
+    Integer countAllByUserAccountId(@Param("user")User userAccount);
 
     //Write a native query to count the number of tickets a user bought in a specific range of dates
+    @Query(value = "SELECT Count(*) FROM ticket WHERE user = ?1 AND date_time BETWEEN ?2 AND ?3",nativeQuery = true)
+    List<Ticket> countAllTicketBoughtByUserInTimeRange(@Param("user") User userAccount,
+                                                       @Param("dateTime1") LocalDateTime dateTime1, @Param("dateTime2")LocalDateTime dateTime2);
 
     //Write a native query to distinct all tickets by movie name
+    @Query(value = "SELECT DISTINCT name FROM movie",nativeQuery = true)
+    List<Ticket> distinctByByMovieName(@Param("name") String name);
 
     //Write a native query to find all tickets by user email
+    @Query(value = "SELECT * FROM ticket WHERE user_email = ?1",nativeQuery = true)
+    List<Ticket> findAllTicketByEmail(@Param("email")String email);
 
     //Write a native query that returns all tickets
+    @Query(value = "SELECT * FROM ticket",nativeQuery = true)
+    List<Ticket> ReturnAllTickets();
 
     //Write a native query to list all tickets where a specific value should be containable in the username or name or movie name
-
+    @Query(value = "SELECT ",nativeQuery = true)
+    List<Ticket> findAllTicketsContainsValueInUserNameOrMovieName(@Param("pattern")String pattern);
 }
