@@ -40,27 +40,34 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     // ------------------- Native QUERIES ------------------- //
 
     //Write a native query to count the number of tickets a user bought
-    @Query(value = "SELECT Count(*) FROM ticket WHERE user = ?1 ",nativeQuery = true)
-    Integer countAllByUserAccountId(@Param("user")User userAccount);
+    @Query(value = "SELECT Count(*) FROM ticket WHERE user_account_id = ?1 ",nativeQuery = true)
+    Integer countTicketByUser(@Param("userId")Long userId);
 
     //Write a native query to count the number of tickets a user bought in a specific range of dates
-    @Query(value = "SELECT Count(*) FROM ticket WHERE user = ?1 AND date_time BETWEEN ?2 AND ?3",nativeQuery = true)
-    List<Ticket> countAllTicketBoughtByUserInTimeRange(@Param("user") User userAccount,
+    @Query(value = "SELECT Count(*) FROM ticket WHERE user_account_id = ?1 AND date_time BETWEEN ?2 AND ?3",nativeQuery = true)
+    List<Ticket> countAllTicketBoughtByUserInDateRange(@Param("userId") Long userId,
                                                        @Param("dateTime1") LocalDateTime dateTime1, @Param("dateTime2")LocalDateTime dateTime2);
 
     //Write a native query to distinct all tickets by movie name
-    @Query(value = "SELECT DISTINCT name FROM movie",nativeQuery = true)
-    List<Ticket> distinctByByMovieName(@Param("name") String name);
+    @Query(value = "SELECT DISTINCT(m.name) FROM ticket t JOIN movie_cinema mc " +
+                   "ON t.movie_cinema_id = mc.id JOIN movie m ON mc.movie_id = m.id",nativeQuery = true)
+    List<Ticket> retrieveAllDistinctMovieNames();
 
     //Write a native query to find all tickets by user email
-    @Query(value = "SELECT * FROM ticket WHERE user_email = ?1",nativeQuery = true)
-    List<Ticket> findAllTicketByEmail(@Param("email")String email);
+    @Query(value = "SELECT * FROM ticket t WHERE user_account ua ON t.user_account_id = ua.id " +
+                "WHERE ua.email  = ?1", nativeQuery = true)
+    List<Ticket> findAllTicketByUserEmail(@Param("email")String email);
 
     //Write a native query that returns all tickets
     @Query(value = "SELECT * FROM ticket",nativeQuery = true)
-    List<Ticket> ReturnAllTickets();
+    List<Ticket> RetrieveAllTickets();
 
     //Write a native query to list all tickets where a specific value should be containable in the username or name or movie name
-    @Query(value = "SELECT ",nativeQuery = true)
-    List<Ticket> findAllTicketsContainsValueInUserNameOrMovieName(@Param("pattern")String pattern);
+    @Query(value = "SELECT * FROM ticket t JOIN user_account ua ON " +
+                 "t.user_account_id = ua.id JOIN account_details ad ON " +
+                 "ad.id = ua.account_details_id JOIN movie_cinema mc ON " +
+                 "t.movie_cinema_id = mc.id JOIN movie m " +
+                 "ON mc.mocvie_id = m.id " +
+                 "WHERE ua.username ILIKE concat('%',?1,'%') OR ad.name ILIKE concat('%',?1,'%') OR m.name ILIKE concat('%',?1,'%')",nativeQuery = true)
+    List<Ticket> retrieveAllBySearchCriteria(@Param("searchCriteria")String searchCriteria);
 }
